@@ -49,10 +49,10 @@ def REID_ARalgorithm_v3(dataset,IVT_threshold,lati,latf,lat_res,loni,lonf,lon_re
     #Calculate length in km from 'major axis length'
 
     for i in C:
-        a1=i[1] #centroid lat
+        a1=i[0][1] #centroid lat
         b1=i[0] #centroid lon
-        o=-1*i[5] #orientation
-        L=(i[3]/2) * ((lat_res+lon_res)/2)
+        o=-1*i[3] #orientation
+        L=(i[2]/2) * ((lat_res+lon_res)/2)
         a2=a1+(L*np.sin(o))
         r=6371000
 
