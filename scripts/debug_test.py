@@ -74,14 +74,21 @@ if __name__ == "__main__":
 
     #aspect ratio and orientation angle test. Excludes systems within 5 degrees of equator (mostly artifacts)
     regions = [region for region in regions if region.axis_major_length/region.axis_minor_length>=aspect_ratio and abs(region.lat_c) >5]
-    #print([r.AR_length for r in regions])
+    
     #Orientation angle is just to get rid of artifacts
     regions = [region for region in regions if abs(np.rad2deg(region.orientation))>10]
-    #print([r.AR_length for r in regions])
+
     #maps pixels in the AR onto lat-lon array
     for region in regions:
         for pixel in region.coords:
-            mask_temp[pixel[0]][pixel[1]] = dataset[pixel[0]][pixel[1]]
+            mask_temp[pixel[0]][pixel[1]] = 1#dataset[pixel[0]][pixel[1]]
     import matplotlib.pyplot as plt
-    plt.imshow(mask_temp, cmap='jet')
+    fig, axes = plt.subplots(1, 2)
+
+    axes[0].imshow(mask_temp, cmap='jet')
+
+    inp=loadmat('data/mask.mat')
+    axes[1].imshow(inp['mask'], cmap='jet')
+    
+    plt.tight_layout()
     plt.show()
