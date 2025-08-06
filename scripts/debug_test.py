@@ -20,23 +20,14 @@ def acosd(angle):
 if __name__ == "__main__":
 
     # Load some input sample data
-    #inp=loadmat('data/ivt_3rd_timestep.mat')
     inp = xr.open_dataarray("data\IVT_input_slice.nc")
 
     IVT_threshold=250
-    lati=-90
-    latf=1
-    lat_res=1
-    loni=0
-    lonf=370
-    lon_res=1
     length_threshold=2000
     aspect_ratio=2
-    #dataset = inp['f']
+
     dataset = inp.values
 
-    #lat=[i for i in range(lati,latf,lat_res)]
-    #lon=[i for i in range(loni,lonf,lon_res)]
     lat = inp.lat.values
     lon = inp.lon.values
     lat_res=lat[1]-lat[0]
@@ -48,21 +39,16 @@ if __name__ == "__main__":
     regions = measure.regionprops(measure.label(A1),dataset)
 
     # Convert centroid coords from pixelspace to lat/lon space
-
     for region in regions:
         L = region.major_axis_length/2 * ((lat_res + lon_res)/2.)
+
         region.lat_c = lat[round(region.centroid[0])]
         region.lon_c = lon[round(region.centroid[1])]
 
         a2 = region.lon_c + L*np.sin(region.orientation)
         a3 = region.lat_c + L*np.cos(region.orientation)
-        distance = 2*great_circle((a3,a2),(region.lat_c,region.lon_c)).kilometers
-        #print(distance)
-        arc=acosd(sind(region.lon_c)*sind(a2)+\
-                  cosd(region.lon_c)*(cosd(a2)*cosd(L*cosd(region.orientation))))
-        
-        AR_length=2*RADIUS_EARTH*arc*np.pi/180/1000.
-        region.AR_length = distance#AR_length
+
+        region.AR_length = 2*great_circle((a3,a2),(region.lat_c,region.lon_c)).kilometers
     
     #length of river must exceed...
     regions = [region for region in regions if region.AR_length>length_threshold]
