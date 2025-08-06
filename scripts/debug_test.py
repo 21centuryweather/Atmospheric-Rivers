@@ -6,26 +6,10 @@ from geopy.distance import great_circle
 import os
 os.chdir("..")
 
-RADIUS_EARTH=6371000
-
-def sind(angle):
-    return np.sin(np.deg2rad(angle))
-
-def cosd(angle):
-    return np.cos(np.deg2rad(angle))
-
-def acosd(angle):
-    return np.rad2deg(np.acos(angle))
-
-if __name__ == "__main__":
+def Identify_AR(PATH="data\IVT_input_slice.nc",IVT_threshold=250,length_threshold=2000,aspect_ratio_threshold=2):
 
     # Load some input sample data
-    inp = xr.open_dataarray("data\IVT_input_slice.nc")
-
-    IVT_threshold=250
-    length_threshold=2000
-    aspect_ratio=2
-
+    inp = xr.open_dataarray(PATH)
     dataset = inp.values
 
     lat = inp.lat.values
@@ -54,28 +38,31 @@ if __name__ == "__main__":
     regions = [region for region in regions if region.AR_length>length_threshold]
 
     #aspect ratio test.
-    regions = [region for region in regions if region.axis_major_length/region.axis_minor_length>=aspect_ratio]
+    regions = [region for region in regions if region.axis_major_length/region.axis_minor_length>=aspect_ratio_threshold]
     
     #orientation angle test. Excludes systems within 5 degrees of equator (mostly artifacts)
     regions = [region for region in regions if abs(region.lat_c) >5]
 
     #Orientation angle is just to get rid of artifacts
-    regions = [region for region in regions if abs(np.rad2deg(region.orientation))<80]
+    regions = [region for region in regions if abs(np.rad2deg(region.orientation))<85]
 
     #maps pixels in the AR onto lat-lon array
     mask=np.zeros_like(dataset)
     for region in regions:
         for pixel in region.coords:
             mask[pixel[0]][pixel[1]] = 1
-
     
-    import matplotlib.pyplot as plt
-    fig, axes = plt.subplots(1, 2)
+    return mask
 
-    axes[0].imshow(mask, cmap='jet')
 
-    inp=loadmat('data/mask.mat')
-    axes[1].imshow(inp['mask'], cmap='jet')
+import matplotlib.pyplot as plt
+mask = Identify_AR()
+fig, axes = plt.subplots(1, 2)
 
-    plt.tight_layout()
-    plt.show()
+axes[0].imshow(mask, cmap='jet')
+
+inp=loadmat('data/mask.mat')
+axes[1].imshow(inp['mask'], cmap='jet')
+
+plt.tight_layout()
+plt.show()

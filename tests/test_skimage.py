@@ -22,14 +22,10 @@ def test_region_props(pytestconfig):
     """
     LOG.info(f'testconfig.rootdir = {pytestconfig.rootdir}')
     DATA_DIR = Path(pytestconfig.rootdir / 'data')
+    
+    DATA_PATH = DATA_DIR / 'IVT_input_slice.nc'
+    regions = region_props(DATA_PATH)
 
-    #Load a sample array from DATA_DIR
-    data = xr.open_dataarray ( DATA_DIR / 'IVT_input_slice.nc')
-
-    IVT_threshold=250   
-    A1 = data.values > IVT_threshold
-
-    regions = measure.regionprops(measure.label(A1),data.values)
 
     LOG.info(f'Found {len(regions)} regions')
 
