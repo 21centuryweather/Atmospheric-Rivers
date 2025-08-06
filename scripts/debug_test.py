@@ -33,7 +33,7 @@ if __name__ == "__main__":
     lat=[i for i in range(lati,latf,lat_res)]
     lon=[i for i in range(loni,lonf,lon_res)]
 
-    mask_temp=np.zeros(dataset.ndim)
+    mask_temp=np.zeros_like(dataset)
     #create binary mask based on input threshold
     A1=np.ones(dataset.ndim)
     A2=dataset
@@ -55,17 +55,33 @@ if __name__ == "__main__":
     AR_lengths =  []
     for region in regions:
         L = region.major_axis_length/2 * ((lat_res + lon_res)/2.)
-        lat_c = lat[round(region.centroid[0])]
-        a1 = lon[round(region.centroid[1])]
+        region.lat_c = lat[round(region.centroid[0])]
+        region.lon_c = lon[round(region.centroid[1])]
 
-        a2 = a1 + L*np.sin(region.orientation)
+        a2 = region.lon_c + L*np.sin(region.orientation)
         
-        arc=acosd(round(sind(a1)*\
-                          sind(a2)+cosd(a1)*\
+        arc=acosd(round(sind(region.lon_c)*\
+                          sind(a2)+cosd(region.lon_c)*\
                           (cosd(a2)*cosd(L*cosd(region.orientation))),15))#remove rounding errors
         
         AR_length=2*RADIUS_EARTH*arc*np.pi/180/1000.
-        
+        region.AR_length = AR_length
         AR_lengths.append(AR_length)
-        coords.append([lat_c,lon_c])
-    print(AR_lengths)
+        coords.append([region.lat_c,region.lon_c])
+    
+    #length of river must exceed...
+    regions = [region for region in regions if region.AR_length>length_threshold]
+
+    #aspect ratio and orientation angle test. Excludes systems within 5 degrees of equator (mostly artifacts)
+    regions = [region for region in regions if region.axis_major_length/region.axis_minor_length>=aspect_ratio and abs(region.lat_c) >5]
+    #print([r.AR_length for r in regions])
+    #Orientation angle is just to get rid of artifacts
+    regions = [region for region in regions if abs(np.rad2deg(region.orientation))>10]
+    #print([r.AR_length for r in regions])
+    #maps pixels in the AR onto lat-lon array
+    for region in regions:
+        for pixel in region.coords:
+            mask_temp[pixel[0]][pixel[1]] = dataset[pixel[0]][pixel[1]]
+    import matplotlib.pyplot as plt
+    plt.imshow(mask_temp, cmap='jet')
+    plt.show()
