@@ -6,6 +6,15 @@ from scipy.io import loadmat
 
 RADIUS_EARTH=6371000
 
+def sind(angle):
+    return np.sin(np.deg2rad(angle))
+
+def cosd(angle):
+    return np.cos(np.deg2rad(angle))
+
+def acosd(angle):
+    return np.rad2deg(np.acos(angle))
+
 if __name__ == "__main__":
 
     # Load some input sample data
@@ -46,16 +55,17 @@ if __name__ == "__main__":
     AR_lengths =  []
     for region in regions:
         L = region.major_axis_length/2 * ((lat_res + lon_res)/2.)
-        lat_c = np.deg2rad(lat[round(region.centroid[0])])
-        a1 = np.deg2rad(lon[round(region.centroid[1])])
+        lat_c = lat[round(region.centroid[0])]
+        a1 = lon[round(region.centroid[1])]
 
-        a2 = a1 + np.deg2rad(L)*np.sin(region.orientation)
-
-        arc=np.acos(round(np.sin(a1)*\
-                          np.sin(a2)+np.cos(a1)*\
-                          (np.cos(a2)*np.cos(L*np.cos(region.orientation))),15))#remove rounding errors
+        a2 = a1 + L*np.sin(region.orientation)
         
-        AR_length=RADIUS_EARTH*arc/1000.
+        arc=acosd(round(sind(a1)*\
+                          sind(a2)+cosd(a1)*\
+                          (cosd(a2)*cosd(L*cosd(region.orientation))),15))#remove rounding errors
+        
+        AR_length=2*RADIUS_EARTH*arc*np.pi/180/1000.
         
         AR_lengths.append(AR_length)
         coords.append([lat_c,lon_c])
+    print(AR_lengths)
