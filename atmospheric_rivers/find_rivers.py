@@ -1,5 +1,5 @@
 # A function which wraps skimage.measure.regionprops
-def region_props(PATH="data\IVT_input_slice.nc",IVT_threshold=250):
+def region_props(PATH,IVT_threshold=250):
     from skimage import measure
     import xarray as xr
     # Load some input sample data
@@ -14,7 +14,7 @@ def region_props(PATH="data\IVT_input_slice.nc",IVT_threshold=250):
 
 #A function where which returns a mask of the river location for a given input netCDF data
 # This will use region_props defined above
-def Identify_AR(PATH="data\IVT_input_slice.nc",IVT_threshold=250,length_threshold=2000,aspect_ratio_threshold=2):
+def Identify_AR(PATH,IVT_threshold=250,length_threshold=2000,aspect_ratio_threshold=2):
     import numpy as np
     from skimage import measure
     import xarray as xr
