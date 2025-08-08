@@ -1,3 +1,4 @@
+import pytest
 from pathlib import Path
 import sys
 from skimage import measure
@@ -5,9 +6,15 @@ import xarray as xr
 import numpy as np
 
 from atmospheric_rivers import logger
-from atmospheric_rivers.find_rivers import region_props
+from atmospheric_rivers.find_rivers import Identify_AR
 
 LOG = logger.get_logger(__name__)
+
+def test_config(pytestconfig):
+
+    LOG.info(f'testconfig.rootdir = {pytestconfig.rootdir}')
+    DATA_DIR = Path(pytestconfig.rootdir / 'data')
+    print(f'DATA_DIR = {DATA_DIR}')
 
 def test_region_props(pytestconfig):
     """
@@ -15,20 +22,19 @@ def test_region_props(pytestconfig):
     This test is valid for skimage version 0.25.2
     """
     LOG.info(f'testconfig.rootdir = {pytestconfig.rootdir}')
-
     DATA_DIR = Path(pytestconfig.rootdir / 'data')
     
     DATA_PATH = DATA_DIR / 'IVT_input_slice.nc'
-    regions = region_props(DATA_PATH)
+    mask = Identify_AR(DATA_PATH)
 
 
-    LOG.info(f'Found {len(regions)} regions')
+    LOG.info(f'Mask was {len(mask.size)}')
 
     """
     Load expected data
     """
     from scipy.io import loadmat
-    expected =loadmat('data/B.mat')["B"]
+    expected =loadmat('data/mask.mat')["mask"]
 
     # Write code using assert statements so the regions you have loaded are what you expect
-    assert np.array_equal(expected, regions,equal_nan=True)
+    assert np.array_equal(mask, expected,equal_nan=True)
