@@ -14,13 +14,11 @@ def region_props(PATH,IVT_threshold=250):
 
 #A function where which returns a mask of the river location for a given input netCDF data
 # This will use region_props defined above
-def Identify_AR(PATH,IVT_threshold=250,length_threshold=2000,aspect_ratio_threshold=2):
+def Identify_AR(inp,IVT_threshold=250,length_threshold=2000,aspect_ratio_threshold=2):
     import numpy as np
     from skimage import measure
-    import xarray as xr
     from geopy.distance import great_circle
     # Load some input sample data
-    inp = xr.open_dataarray(PATH)
     dataset = inp.values
 
     lat = inp.lat.values

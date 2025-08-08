@@ -25,7 +25,8 @@ def test_Identify_AR(pytestconfig):
     DATA_DIR = Path(pytestconfig.rootdir / 'data')
     
     DATA_PATH = DATA_DIR / 'IVT_input_slice.nc'
-    mask = Identify_AR(DATA_PATH)
+    data = xr.open_dataarray(DATA_PATH)
+    mask = Identify_AR(data)
 
 
     LOG.info(f'Mask was {mask.size}')
@@ -48,7 +49,8 @@ def test_Identify_AR_version(pytestconfig):
     DATA_DIR = Path(pytestconfig.rootdir / 'data')
     
     DATA_PATH = DATA_DIR / 'IVT_input_slice.nc'
-    mask = Identify_AR(DATA_PATH)
+    data = xr.open_dataarray(DATA_PATH)
+    mask = Identify_AR(data)
     
     # use
     # mask.tofile(DATA_DIR/"IVT_input_slice8.8.25.bin")
