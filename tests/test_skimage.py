@@ -3,11 +3,13 @@ import sys
 from skimage import measure
 import xarray as xr
 import numpy as np
+from scipy.io import loadmat
 
 from atmospheric_rivers import logger
 from atmospheric_rivers.find_rivers import region_props
 
 LOG = logger.get_logger(__name__)
+
 
 def test_region_props(pytestconfig):
     """
@@ -24,10 +26,9 @@ def test_region_props(pytestconfig):
 
     LOG.info(f'Found {len(regions)} regions')
     regions = np.array([[r.centroid[1]+1,r.centroid[0]+1,r.axis_major_length,r.axis_minor_length,[np.rad2deg(r.orientation),90+np.rad2deg(r.orientation)][r.orientation<0],r.mean_intensity,r.max_intensity] for r in regions])
-    """
-    Load expected data
-    """
-    from scipy.io import loadmat
+
+    #Load expected data from MATLAB
+    
     expected =loadmat('data/B.mat')["B"]
 
     # Write code using assert statements so the regions you have loaded are what you expect

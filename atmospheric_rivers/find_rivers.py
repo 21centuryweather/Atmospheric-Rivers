@@ -1,7 +1,14 @@
 # A function which wraps skimage.measure.regionprops
+import numpy as np
+from skimage import measure
+from geopy.distance import great_circle
+import xarray as xr
+
+EQUATOR_TOL = 5 #Exclude rivers whithin this tolerance (+/-) of the equator
+ORIENTATION_ANGLE = 85 # Excludes objects that don't have the correct angle 
+
 def region_props(PATH,IVT_threshold=250):
-    from skimage import measure
-    import xarray as xr
+
     # Load some input sample data
     inp = xr.open_dataarray(PATH)
     dataset = inp.values
@@ -12,12 +19,12 @@ def region_props(PATH,IVT_threshold=250):
     return measure.regionprops(measure.label(A1),dataset)
 
 
-#A function where which returns a mask of the river location for a given input netCDF data
-# This will use region_props defined above
 def Identify_AR(inp,IVT_threshold=250,length_threshold=2000,aspect_ratio_threshold=2):
-    import numpy as np
-    from skimage import measure
-    from geopy.distance import great_circle
+    """
+    A function where which returns a mask of the river location for a given input netCDF data
+    This will use region_props defined above
+    """
+
     # Load some input sample data
     dataset = inp.values
 
@@ -50,10 +57,10 @@ def Identify_AR(inp,IVT_threshold=250,length_threshold=2000,aspect_ratio_thresho
     regions = [region for region in regions if region.axis_major_length/region.axis_minor_length>=aspect_ratio_threshold]
     
     #orientation angle test. Excludes systems within 5 degrees of equator (mostly artifacts)
-    regions = [region for region in regions if abs(region.lat_c) >5]
+    regions = [region for region in regions if abs(region.lat_c) > EQUATOR_TOL]
 
     #Orientation angle is just to get rid of artifacts
-    regions = [region for region in regions if abs(np.rad2deg(region.orientation))<85]
+    regions = [region for region in regions if abs(np.rad2deg(region.orientation))< ORIENTATION_ANGLE]
 
     #maps pixels in the AR onto lat-lon array
     mask=np.zeros_like(dataset)
